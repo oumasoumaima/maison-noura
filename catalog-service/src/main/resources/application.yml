@@ -1,0 +1,21 @@
+server:
+  port: 8081
+  error:
+    include-message: always
+
+spring:
+  application:
+    name: catalog-service
+  datasource:
+    url: jdbc:postgresql://localhost:5433/catalog   # écrasé par SPRING_DATASOURCE_URL dans Docker
+    username: noura
+    password: noura
+  jpa:
+    hibernate:
+      ddl-auto: update        # OK pour un projet démo ; utiliser Flyway en production
+    open-in-view: false
+
+# Revalidation des tokens JWT Keycloak, indépendamment de la Gateway (defense in depth)
+keycloak:
+  issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8090/realms/maison-noura}
+  jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8090/realms/maison-noura/protocol/openid-connect/certs}

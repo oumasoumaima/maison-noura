@@ -1,0 +1,43 @@
+{
+  "realm": "maison-noura",
+  "enabled": true,
+  "registrationAllowed": false,
+  "loginTheme": "keycloak",
+  "sslRequired": "none",
+  "roles": {
+    "realm": [
+      { "name": "admin", "description": "Membre de l'équipe Maison Noura : gère les rendez-vous et la carte des soins." }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "frontend",
+      "name": "Maison Noura — site web",
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:4200/*"],
+      "webOrigins": ["http://localhost:4200"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:4200/*"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "equipe",
+      "email": "equipe@maisonnoura.ma",
+      "firstName": "Équipe",
+      "lastName": "Maison Noura",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "equipe123", "temporary": false }
+      ],
+      "realmRoles": ["admin"]
+    }
+  ]
+}

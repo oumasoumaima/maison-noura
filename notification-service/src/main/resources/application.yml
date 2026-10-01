@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: notification-service
+  main:
+    web-application-type: none     # service purement asynchrone : pas de serveur HTTP
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  mail:
+    host: localhost                # MailHog : http://localhost:8025
+    port: 1025

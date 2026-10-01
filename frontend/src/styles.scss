@@ -1,0 +1,155 @@
+:root {
+  // ---------- Palette : crème, vert profond, or discret ----------
+  --cream: #f7f1e4;
+  --cream-soft: #fbf8f1;
+  --green: #333f28;        // vert profond — marque, boutons, footer
+  --green-deep: #232b1c;   // footer, survols
+  --gold: #ab8a54;         // filets, étoiles, accents rares
+  --ink: #29241d;
+  --muted: #756c5e;
+  --line: #e6dcc4;
+  --error: #9c3b2e;
+
+  --display: 'Cormorant Garamond', 'Georgia', serif;
+  --body: 'Jost', system-ui, sans-serif;
+
+  --radius: 14px;
+  --shadow: 0 18px 40px -22px rgba(35, 30, 20, .35);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font: 400 1.05rem/1.65 var(--body);
+}
+
+h1, h2, h3 {
+  font-family: var(--display);
+  font-weight: 500;
+  line-height: 1.12;
+  color: var(--green);
+  margin: 0 0 .5em;
+}
+h1 { font-size: clamp(2.4rem, 5vw, 3.8rem); letter-spacing: .2px; }
+h2 { font-size: clamp(1.9rem, 3.4vw, 2.6rem); }
+h3 { font-size: 1.3rem; }
+p { margin: 0 0 1em; max-width: 62ch; }
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+.container { width: min(1180px, 100% - 3rem); margin-inline: auto; }
+.narrow { max-width: 640px; }
+.page { padding-block: 3rem 5rem; }
+.muted { color: var(--muted); }
+.lead { font-size: 1.2rem; color: var(--muted); max-width: 52ch; }
+
+// ---------- Titres de section centrés, avec petit trait ----------
+.section-head {
+  text-align: center;
+  margin-bottom: 2.75rem;
+  &__eyebrow { color: var(--gold); font-size: .95rem; margin: 0; }
+  h2 { margin-bottom: .4rem; }
+  .rule { width: 48px; height: 2px; background: var(--gold); margin: .9rem auto 1rem; border: 0; }
+  p { margin-inline: auto; }
+}
+
+// ---------- Boutons ----------
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .8rem 1.7rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--green);
+  background: var(--green);
+  color: #fff;
+  font: 500 1rem var(--body);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .15s ease, filter .15s ease;
+  &:hover:not(:disabled) { filter: brightness(1.12); }
+  &:active:not(:disabled) { transform: translateY(1px); }
+  &:disabled { opacity: .45; cursor: not-allowed; }
+  &--outline { background: transparent; color: var(--green); }
+  &--light { background: transparent; color: #fff; border-color: rgba(255,255,255,.7); }
+  &--small { padding: .4rem 1.05rem; font-size: .88rem; }
+}
+.actions { display: flex; flex-wrap: wrap; gap: .9rem; margin-top: 1.6rem; }
+
+// ---------- Cartes photo : <img appPhoto> plein cadre ; dégradé + libellé restent pour l'équipe (photos à fournir) ----------
+.photo {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: linear-gradient(155deg, var(--tint, #cdd4bd), var(--tint2, #a9b393));
+  display: grid;
+  place-content: center;
+  color: rgba(255,255,255,.92);
+  min-height: 160px;
+  &::after {
+    content: attr(data-label);
+    font-family: var(--display);
+    font-size: 1.05rem;
+    letter-spacing: .3px;
+    text-align: center;
+    padding: 0 1rem;
+  }
+  > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  &--1 { --tint: #cdd4bd; --tint2: #7c8a63; }
+  &--2 { --tint: #e3cdb2; --tint2: #b58a5c; }
+  &--3 { --tint: #cbb9c9; --tint2: #8f6f8c; }
+  &--4 { --tint: #b9c7c6; --tint2: #5f7876; }
+  &--5 { --tint: #ddc9a3; --tint2: #a4854f; }
+  &--6 { --tint: #c5cdb0; --tint2: #6c7a52; }
+}
+
+// ---------- Formulaires ----------
+.field { display: grid; gap: .35rem; margin-bottom: 1.1rem; }
+.field label, legend { font-weight: 500; }
+fieldset { border: 0; padding: 0; margin: 0 0 2rem; }
+legend { font-family: var(--display); font-size: 1.4rem; color: var(--green); padding: 0; margin-bottom: .8rem; }
+input, select, textarea {
+  font: inherit;
+  padding: .7rem .9rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  width: 100%;
+}
+textarea { resize: vertical; min-height: 120px; }
+input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+
+// ---------- Messages ----------
+.notice { padding: 1rem 1.2rem; border-radius: 10px; border-left: 4px solid var(--gold); background: var(--cream-soft); margin: 1rem 0; }
+.notice--error { border-color: var(--error); }
+.notice--success { border-color: var(--green); }
+
+// ---------- Badges de statut (espace équipe) ----------
+.badge { display: inline-block; padding: .1rem .7rem; border-radius: 999px; font-size: .85rem; font-weight: 600; }
+.badge--EN_ATTENTE { background: #f1e4c8; color: #6d4f1f; }
+.badge--CONFIRME { background: var(--green); color: #fff; }
+.badge--ANNULE { background: #e7e0d1; color: var(--muted); }
+.badge--TERMINE { background: #fff; border: 1px solid var(--green); color: var(--green); }
+
+// ---------- Tableaux (espace équipe) ----------
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius); overflow: hidden; }
+th, td { text-align: left; padding: .75rem 1rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--green); border-bottom: 2px solid var(--green); }
+td .btn + .btn { margin-left: .4rem; }
+
+// ---------- Étoiles ----------
+.stars { color: var(--gold); letter-spacing: 2px; }
+
+
+.brand { display: flex; align-items: center; text-decoration: none; }
+.brand__logo { height: 52px; width: auto; display: block; }
+@media (max-width: 600px) { .brand__logo { height: 42px; } }
+
+.brand__logo--footer { height: 56px; }

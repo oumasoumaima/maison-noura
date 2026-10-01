@@ -1,0 +1,35 @@
+server:
+  port: 8082
+  error:
+    include-message: always
+
+spring:
+  application:
+    name: booking-service
+  datasource:
+    url: jdbc:postgresql://localhost:5434/booking   # écrasé par SPRING_DATASOURCE_URL dans Docker
+    username: noura
+    password: noura
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+# Revalidation des tokens JWT Keycloak, indépendamment de la Gateway (defense in depth)
+keycloak:
+  issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8090/realms/maison-noura}
+  jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8090/realms/maison-noura/protocol/openid-connect/certs}
+
+# Règles du salon
+booking:
+  opening: "09:00"
+  closing: "19:00"
+  slot-step-minutes: 30
+  capacity: 2               # 2 employées = 2 rendez-vous simultanés maximum
+  closed-days: SUNDAY
+  catalog-url: http://localhost:8081
