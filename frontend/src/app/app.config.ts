@@ -14,23 +14,33 @@ registerLocaleData(localeFr);
  * "check-sso" : au chargement, on vérifie discrètement (iframe cachée) si une session Keycloak
  * existe déjà, sans forcer de redirection. La connexion réelle n'est demandée que lorsqu'on
  * essaie d'accéder à /admin (voir AdminGuard).
+ *
+ * Si le serveur Keycloak est inaccessible (démo sans backend), l'application démarre quand même
+ * et les fonctionnalités d'authentification sont simplement désactivées.
  */
 function initializeKeycloak(keycloak: KeycloakService) {
   return () =>
-    keycloak.init({
-      config: KEYCLOAK_CONFIG,
-      initOptions: {
-        onLoad: 'check-sso',
-        silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
-        pkceMethod: 'S256',
-      },
-    });
+    keycloak
+      .init({
+        config: KEYCLOAK_CONFIG,
+        initOptions: {
+          onLoad: 'check-sso',
+          silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+          pkceMethod: 'S256',
+          checkLoginIframeInterval: 0,
+        },
+      })
+      .catch(() => {
+        // Keycloak non disponible (backend non démarré ou déploiement statique sans backend).
+        // L'application reste fonctionnelle en mode "non authentifié".
+        console.warn('Keycloak non disponible — mode démo (sans backend).');
+      });
 }
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()),   // nécessaire : KeycloakBearerInterceptor est un intercepteur "classique" (DI)
+    provideHttpClient(withInterceptorsFromDi()),
     { provide: LOCALE_ID, useValue: 'fr' },
     importProvidersFrom(KeycloakAngularModule),
     { provide: HTTP_INTERCEPTORS, useClass: KeycloakBearerInterceptor, multi: true },
