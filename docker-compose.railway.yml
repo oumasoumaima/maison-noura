@@ -1,0 +1,109 @@
+# docker-compose.railway.yml — Stack production pour Railway
+# Variables d'env injectées par Railway via le dashboard
+name: maison-noura
+
+services:
+  # ---------- Infrastructure ----------
+  catalog-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: catalog
+      POSTGRES_USER: ${DB_USER:-noura}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-noura}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-noura} -d catalog"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  booking-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: booking
+      POSTGRES_USER: ${DB_USER:-noura}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-noura}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-noura} -d booking"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-alpine
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: ${KC_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD:-admin}
+      KC_HOSTNAME: ${KC_PUBLIC_HOST}      # ex: keycloak.railway.app
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY: edge
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /realms/maison-noura HTTP/1.1\\r\\nhost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q 200 <&3"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # ---------- Services métier ----------
+  catalog-service:
+    build: ./catalog-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://catalog-db:5432/catalog
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-noura}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-noura}
+      KEYCLOAK_ISSUER_URI: ${KC_ISSUER_URI}
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/maison-noura/protocol/openid-connect/certs
+    depends_on:
+      catalog-db: { condition: service_healthy }
+      keycloak: { condition: service_healthy }
+
+  booking-service:
+    build: ./booking-service
+    environment:
+      TZ: Africa/Casablanca
+      SPRING_DATASOURCE_URL: jdbc:postgresql://booking-db:5432/booking
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-noura}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-noura}
+      SPRING_RABBITMQ_HOST: rabbitmq
+      BOOKING_CATALOG_URL: http://catalog-service:8081
+      KEYCLOAK_ISSUER_URI: ${KC_ISSUER_URI}
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/maison-noura/protocol/openid-connect/certs
+    depends_on:
+      booking-db: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      catalog-service: { condition: service_started }
+      keycloak: { condition: service_healthy }
+
+  notification-service:
+    build: ./notification-service
+    environment:
+      TZ: Africa/Casablanca
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_MAIL_HOST: ${MAIL_HOST:-mailhog}
+      SPRING_MAIL_PORT: ${MAIL_PORT:-1025}
+    depends_on:
+      rabbitmq: { condition: service_healthy }
+
+  api-gateway:
+    build: ./api-gateway
+    environment:
+      CATALOG_URI: http://catalog-service:8081
+      BOOKING_URI: http://booking-service:8082
+      KEYCLOAK_ISSUER_URI: ${KC_ISSUER_URI}
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/maison-noura/protocol/openid-connect/certs
+    ports:
+      - "8080:8080"
+    depends_on:
+      - catalog-service
+      - booking-service
+      - keycloak

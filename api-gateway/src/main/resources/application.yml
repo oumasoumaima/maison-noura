@@ -12,8 +12,11 @@ spring:
           '[/**]':
             allowedOrigins:
               - "http://localhost:4200"
+              - "https://maison-noura-brown.vercel.app"
+              - "https://*.vercel.app"
             allowedMethods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
             allowedHeaders: "*"
+            allowCredentials: true
       routes:
         - id: catalog-service
           uri: ${CATALOG_URI:http://localhost:8081}
