@@ -3,7 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { CatalogService } from '../core/catalog.service';
-import { PhotoKey } from '../core/content';
+import { PhotoKey, STATIC_CATEGORIES, STATIC_PRESTATIONS } from '../core/content';
 import { Category, Prestation } from '../core/models';
 import { PhotoDirective } from '../core/photo.directive';
 
@@ -15,6 +15,8 @@ const CATEGORY_PHOTOS: Record<string, PhotoKey[]> = {
   'Soins du visage': ['visage', 'produits'],
   'Ongles': ['manucure', 'vernis'],
   'Hammam & gommage': ['spa'],
+  'Maquillage': ['maquillage'],
+  'Épilation': ['epilation'],
 };
 const DEFAULT_PHOTOS: PhotoKey[] = ['salon', 'salon2'];
 /** Photo dédiée à un soin précis (prioritaire sur la photo de la catégorie). */
@@ -31,12 +33,8 @@ const PRESTATION_PHOTOS: Record<string, PhotoKey> = {
       <div class="section-head">
         <h1>Nos services</h1>
         <hr class="rule">
-        <p>Découvrez l'ensemble de nos prestations beauté. Les prix sont en dirhams.</p>
+        <p>Découvrez l'ensemble de nos prestations beauté. <span class="price-note">Les prix sont en dirhams.</span></p>
       </div>
-
-      @if (error()) {
-        <p class="notice notice--error">Impossible de charger les soins. Vérifiez que l'API est démarrée, puis rechargez la page.</p>
-      }
 
       @for (g of groups(); track g.category.id) {
         <section class="group">
@@ -66,6 +64,7 @@ const PRESTATION_PHOTOS: Record<string, PhotoKey> = {
     .card .photo { aspect-ratio: 4/3; margin-bottom: 1rem; }
     .card h3 { margin-bottom: .15rem; }
     .price { color: var(--green); font-weight: 600; margin-bottom: .4rem; }
+    .price-note { color: var(--muted); }
     @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
   `,
@@ -73,15 +72,15 @@ const PRESTATION_PHOTOS: Record<string, PhotoKey> = {
 export class ServicesComponent {
   private catalog = inject(CatalogService);
   groups = signal<Group[]>([]);
-  error = signal(false);
 
   photo(categoryName: string, index: number, prestationName?: string): PhotoKey {
-  if (prestationName && PRESTATION_PHOTOS[prestationName]) return PRESTATION_PHOTOS[prestationName];
-  const list = CATEGORY_PHOTOS[categoryName] ?? DEFAULT_PHOTOS;
-  return list[index % list.length];
-}
+    if (prestationName && PRESTATION_PHOTOS[prestationName]) return PRESTATION_PHOTOS[prestationName];
+    const list = CATEGORY_PHOTOS[categoryName] ?? DEFAULT_PHOTOS;
+    return list[index % list.length];
+  }
 
   constructor() {
+    // Tente de charger depuis l'API ; si elle n'est pas disponible, utilise les données statiques
     forkJoin({ categories: this.catalog.categories(), prestations: this.catalog.prestations() }).subscribe({
       next: ({ categories, prestations }) =>
         this.groups.set(
@@ -89,7 +88,15 @@ export class ServicesComponent {
             .map(category => ({ category, items: prestations.filter(p => p.category.id === category.id) }))
             .filter(g => g.items.length > 0),
         ),
-      error: () => this.error.set(true),
+      error: () => {
+        // API non disponible → fallback sur les données statiques embarquées
+        console.warn('API non disponible, utilisation des données statiques.');
+        this.groups.set(
+          STATIC_CATEGORIES
+            .map(category => ({ category, items: STATIC_PRESTATIONS.filter(p => p.category.id === category.id) }))
+            .filter(g => g.items.length > 0),
+        );
+      },
     });
   }
 }

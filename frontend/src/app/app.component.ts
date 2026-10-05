@@ -28,7 +28,7 @@ import { KeycloakService } from 'keycloak-angular';
           @if (isLoggedIn()) {
             <a routerLink="/admin" class="btn btn--outline btn--small">Espace équipe</a>
             <button type="button" class="btn btn--outline btn--small" (click)="logout()">Se déconnecter</button>
-          } @else {
+          } @else if (keycloakAvailable()) {
             <a routerLink="/connexion" class="btn btn--outline btn--small">Connexion</a>
           }
           <a routerLink="/reserver" class="btn btn--small">Prendre rendez-vous</a>
@@ -145,11 +145,22 @@ import { KeycloakService } from 'keycloak-angular';
 export class AppComponent {
   private keycloak = inject(KeycloakService);
   year = new Date().getFullYear();
-  isLoggedIn = signal(this.keycloak.isLoggedIn());
+  isLoggedIn = signal(false);
+  keycloakAvailable = signal(false);
 
   constructor() {
-    // Garde l'en-tête à jour après une connexion / déconnexion / expiration de session.
-    this.keycloak.keycloakEvents$.subscribe(() => this.isLoggedIn.set(this.keycloak.isLoggedIn()));
+    // Vérifie si Keycloak est disponible (initialisé correctement)
+    try {
+      const kc = this.keycloak.getKeycloakInstance();
+      if (kc && kc.authServerUrl) {
+        this.keycloakAvailable.set(true);
+        this.isLoggedIn.set(this.keycloak.isLoggedIn());
+        // Garde l'en-tête à jour après une connexion / déconnexion / expiration de session.
+        this.keycloak.keycloakEvents$.subscribe(() => this.isLoggedIn.set(this.keycloak.isLoggedIn()));
+      }
+    } catch {
+      // Keycloak non disponible (backend absent) — on masque les boutons d'auth
+    }
   }
 
   logout() {

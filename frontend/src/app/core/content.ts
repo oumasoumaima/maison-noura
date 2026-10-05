@@ -100,3 +100,42 @@ export const TESTIMONIALS: Testimonial[] = [
   { name: 'Meryem A.', rating: 5, text: "Les soins sont exceptionnels, l'accueil chaleureux et les produits de grande qualité. Je recommande vivement." },
   { name: 'Imane B.', rating: 5, text: "J'ai trouvé mon salon de beauté préféré à Casablanca. Merci Maison Noura pour votre excellence !" },
 ];
+
+// ─── Données statiques de secours (utilisées quand l'API backend n'est pas disponible) ───
+import { Category, Prestation } from './models';
+
+export const STATIC_CATEGORIES: Category[] = [
+  { id: 1, name: 'Coiffure', description: 'Coupes, colorations et soins capillaires.' },
+  { id: 2, name: 'Soins du visage', description: 'Soins hydratants, anti-âge et éclat.' },
+  { id: 3, name: 'Ongles', description: 'Manucure, pédicure et pose de vernis.' },
+  { id: 4, name: 'Hammam & gommage', description: 'Rituels détente et gommage corps.' },
+  { id: 5, name: 'Maquillage', description: 'Maquillage jour, soirée et mariage.' },
+  { id: 6, name: 'Épilation', description: 'Épilation à la cire douce.' },
+];
+
+export const STATIC_PRESTATIONS: Prestation[] = [
+  // Coiffure
+  { id: 1, name: 'Coupe femme', price: 150, durationMinutes: 45, category: STATIC_CATEGORIES[0] },
+  { id: 2, name: 'Brushing', price: 100, durationMinutes: 30, category: STATIC_CATEGORIES[0] },
+  { id: 3, name: 'Coloration complète', price: 350, durationMinutes: 90, category: STATIC_CATEGORIES[0] },
+  { id: 4, name: 'Balayage / mèches', price: 450, durationMinutes: 120, category: STATIC_CATEGORIES[0] },
+  { id: 5, name: 'Soin à la kératine', price: 600, durationMinutes: 150, category: STATIC_CATEGORIES[0] },
+  // Soins du visage
+  { id: 6, name: 'Soin hydratant', price: 200, durationMinutes: 60, category: STATIC_CATEGORIES[1] },
+  { id: 7, name: 'Soin anti-âge', price: 280, durationMinutes: 75, category: STATIC_CATEGORIES[1] },
+  { id: 8, name: 'Nettoyage de peau', price: 180, durationMinutes: 60, category: STATIC_CATEGORIES[1] },
+  // Ongles
+  { id: 9, name: 'Manucure classique', price: 80, durationMinutes: 30, category: STATIC_CATEGORIES[2] },
+  { id: 10, name: 'Pose vernis semi-permanent', price: 130, durationMinutes: 45, category: STATIC_CATEGORIES[2] },
+  { id: 11, name: 'Pédicure complète', price: 120, durationMinutes: 45, category: STATIC_CATEGORIES[2] },
+  // Hammam
+  { id: 12, name: 'Rituel hammam & gommage', price: 300, durationMinutes: 90, category: STATIC_CATEGORIES[3] },
+  { id: 13, name: 'Gommage corps', price: 200, durationMinutes: 60, category: STATIC_CATEGORIES[3] },
+  // Maquillage
+  { id: 14, name: 'Maquillage naturel', price: 200, durationMinutes: 45, category: STATIC_CATEGORIES[4] },
+  { id: 15, name: 'Maquillage soirée / mariage', price: 350, durationMinutes: 75, category: STATIC_CATEGORIES[4] },
+  // Épilation
+  { id: 16, name: 'Épilation visage', price: 60, durationMinutes: 20, category: STATIC_CATEGORIES[5] },
+  { id: 17, name: 'Épilation jambes complètes', price: 150, durationMinutes: 45, category: STATIC_CATEGORIES[5] },
+  { id: 18, name: 'Épilation corps complet', price: 280, durationMinutes: 90, category: STATIC_CATEGORIES[5] },
+];
